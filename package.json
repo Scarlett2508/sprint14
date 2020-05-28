@@ -1,7 +1,7 @@
 {
-  "name": "sprint12",
+  "name": "sprint14",
   "version": "1.0.0",
-  "description": "Project for learning back-end, Node.js and express",
+  "description": "Project for learning authorization",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
