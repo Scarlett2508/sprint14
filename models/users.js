@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 8,
+    select: false,
   },
   email: {
     type: String,
@@ -40,5 +41,16 @@ const userSchema = new mongoose.Schema({
     },
   },
 });
+
+// eslint-disable-next-line func-names
+userSchema.statics.findUserByCredentials = function (email) {
+  return userSchema.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+      return user;
+    });
+};
 
 module.exports = mongoose.model('user', userSchema);
