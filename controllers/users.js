@@ -29,19 +29,30 @@ module.exports.createUser = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(400).send({ message: err.message });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      if (err.status === 409 || err.statusCode === 409) {
+        Error.message = 'Такое уже есть';
+      }
+      return res.status(500).send({ message: err.message });
     });
 };
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.id)
     .then((user) => {
-      if (user == null) {
-        throw new Error('Not Found!');
+      if (!user) {
+        res.status(404).send({ message: 'Пользователь не найден' });
       }
       res.send({ data: user });
     })
-    .catch(() => res.status(400).send({ message: 'Такого пользователя нет' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: err.message });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: err.message });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports.login = (req, res) => {
