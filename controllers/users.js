@@ -29,7 +29,7 @@ module.exports.createUser = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(400).send({ message: err.message });
       }
-      if (err.status === 409 || err.statusCode === 409) {
+      if (err.code === '11000') {
         Error.message = 'Такое уже есть';
       }
       return res.status(500).send({ message: err.message });
