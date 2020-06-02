@@ -30,7 +30,7 @@ module.exports.createUser = (req, res) => {
         return res.status(400).send({ message: err.message });
       }
       if (err.code === '11000') {
-        Error.message = 'Такое уже есть';
+        Error.message = 'Conflict';
       }
       return res.status(500).send({ message: err.message });
     });
