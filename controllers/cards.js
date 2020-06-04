@@ -24,7 +24,7 @@ module.exports.deleteCard = (req, res) => {
   Card.findById(cardId).populate('owner')
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Not Found' });
+        return res.status(404).send({ message: 'Not Found' });
       }
       if (toString(card.owner) !== toString(req.user._id)) {
         return res.status(403).send({ message: 'Forbidden/Доступ запрещён' });
