@@ -29,7 +29,8 @@ module.exports.createUser = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(400).send({ message: err.message });
       }
-      if (err.code === '11000') {
+      // eslint-disable-next-line eqeqeq
+      if (err.code == '11000') {
         return res.status(409).send({ message: 'Conflict' });
       }
       return res.status(500).send({ message: 'Внутренняя ошибка сервера' });
