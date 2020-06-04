@@ -24,15 +24,15 @@ module.exports.createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: err.message });
+        return res.status(400).send({ message: 'Ошибка валидации' });
       }
       if (err.name === 'CastError') {
         return res.status(400).send({ message: err.message });
       }
       if (err.code === '11000') {
-        Error.message = 'Conflict';
+        return res.status(409).send({ message: 'Conflict' });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({ message: 'Внутренняя ошибка сервера' });
     });
 };
 

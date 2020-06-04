@@ -20,22 +20,22 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  const { id } = req.params;
-  Card.findById(id).populate('owner')
+  const { cardId } = req.params;
+  Card.findById(cardId).populate('owner')
     .then((card) => {
       if (!card) {
         res.status(404).send({ message: 'Not Found' });
       }
-      if (JSON.stringify(card.owner) !== JSON.stringify(req.user._id)) {
+      if (toString(card.owner) !== toString(req.user._id)) {
         return res.status(403).send({ message: 'Forbidden/Доступ запрещён' });
       }
-      res.send({ data: card });
-      return card.remove();
+      return Card.findByIdAndRemove(cardId)
+        .then(() => res.send({ card }));
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Bad request' });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({ message: 'Внутренняя ошибка сервера' });
     });
 };
