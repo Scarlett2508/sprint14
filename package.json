@@ -21,9 +21,11 @@
     "body-parser": "^1.19.0",
     "celebrate": "^12.1.1",
     "express": "^4.17.1",
+    "express-winston": "^4.0.3",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.17",
     "mongoose-validator": "^2.1.0",
-    "validator": "^13.0.0"
+    "validator": "^13.0.0",
+    "winston": "^3.2.1"
   }
 }
