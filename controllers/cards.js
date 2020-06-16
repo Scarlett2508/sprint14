@@ -1,8 +1,6 @@
 const Card = require('../models/cards');
-const BadRequestError = require('../errors/bad-request-err');
 const ForbiddenError = require('../errors/forbidden-err');
 const NotFoundError = require('../errors/not-found-err');
-const Error = require('../middlewares/error');
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
@@ -18,7 +16,7 @@ module.exports.getCards = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId).populate('owner')
     .then((card) => {
@@ -31,10 +29,5 @@ module.exports.deleteCard = (req, res) => {
       return Card.findByIdAndRemove(cardId)
         .then(() => res.send({ card }));
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Bad request!');
-      }
-      throw new Error('Something happened');
-    });
+    .catch(next);
 };

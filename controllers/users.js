@@ -1,11 +1,15 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
+const BadRequestError = require('../errors/bad-request-err');
+const ConflictError = require('../errors/conflict-err');
+const Error = require('../middlewares/error');
 
-module.exports.getUsers = (req, res) => {
+
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
 module.exports.createUser = (req, res) => {
@@ -24,16 +28,16 @@ module.exports.createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Ошибка валидации' });
+        throw new BadRequestError('Validation error');
       }
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: err.message });
+        throw new BadRequestError('Bad request');
       }
       // eslint-disable-next-line eqeqeq
       if (err.code == '11000') {
-        return res.status(409).send({ message: 'Conflict' });
+        throw new ConflictError('User already exists');
       }
-      return res.status(500).send({ message: 'Внутренняя ошибка сервера' });
+      throw new Error('Something happened');
     });
 };
 
@@ -41,22 +45,22 @@ module.exports.getUser = (req, res) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'Пользователь не найден' });
+        throw new BadRequestError('This user doesn not exist!');
       }
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: err.message });
+        throw new BadRequestError('Validation error');
       }
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: err.message });
+        throw new BadRequestError('Bad request');
       }
-      return res.status(500).send({ message: err.message });
+      throw new Error('Something happened');
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -65,7 +69,5 @@ module.exports.login = (req, res) => {
         token: jwt.sign({ _id: user._id }, 'secret', { expiresIn: '7d' }),
       });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch(next);
 };
