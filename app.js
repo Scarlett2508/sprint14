@@ -24,6 +24,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(requestLogger);
 
 app.get('/crash-test', () => {
   setTimeout(() => {
@@ -33,8 +34,8 @@ app.get('/crash-test', () => {
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
-    title: Joi.string().required().min(2).max(30),
-    text: Joi.string().required().min(2),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
   }),
 }), login);
 
@@ -42,13 +43,13 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     about: Joi.string().required().min(2).max(30),
-    avatar: Joi.string().required(),
+    avatar: Joi.string().required().url(),
     password: Joi.string().required().min(8),
     email: Joi.string().required().email(),
   }),
 }), createUser);
 
-app.use(requestLogger);
+
 app.post('/signin', login);
 app.post('/signup', createUser);
 
