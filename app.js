@@ -58,9 +58,6 @@ app.post('/signup', celebrate({
 }), createUser);
 
 
-app.post('/signin', login);
-app.post('/signup', createUser);
-
 app.use(auth);
 
 app.use('/', userRoutes);

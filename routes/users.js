@@ -5,7 +5,7 @@ const { getUser, getUsers } = require('../controllers/users');
 
 routes.get('/:id', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24),
+    id: Joi.string().alphanum().length(24),
   }),
 }), getUser);
 
