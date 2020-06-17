@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/users');
 const BadRequestError = require('../errors/bad-request-err');
 const ConflictError = require('../errors/conflict-err');
-const Error = require('../middlewares/error');
+const UnauthorizedError = require('../errors/unauthorized-err');
+const ThrowError = require('../middlewares/throwError');
 
 
 module.exports.getUsers = (req, res, next) => {
@@ -37,7 +38,7 @@ module.exports.createUser = (req, res) => {
       if (err.code == '11000') {
         throw new ConflictError('User already exists');
       }
-      throw new Error('Something happened');
+      throw new ThrowError('Something happened');
     });
 };
 
@@ -56,7 +57,7 @@ module.exports.getUser = (req, res) => {
       if (err.name === 'CastError') {
         throw new BadRequestError('Bad request');
       }
-      throw new Error('Something happened');
+      throw new ThrowError('Something happened');
     });
 };
 
@@ -64,6 +65,7 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
+    .orFail(new UnauthorizedError('Неправильный email или пароль'))
     .then((user) => {
       res.send({
         token: jwt.sign({ _id: user._id }, 'secret', { expiresIn: '7d' }),

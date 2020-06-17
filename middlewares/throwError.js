@@ -1,4 +1,4 @@
-const Error = (err, req, res, next) => {
+const ThrowError = (err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
     .status(statusCode)
@@ -10,4 +10,4 @@ const Error = (err, req, res, next) => {
   next();
 };
 
-module.exports = { Error };
+module.exports = { ThrowError };

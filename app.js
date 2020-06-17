@@ -3,13 +3,14 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
+const validator = require('validator');
 const userRoutes = require('./routes/users');
 const cardRoutes = require('./routes/cards');
 
 const { createUser, login } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const auth = require('./middlewares/auth');
-const { Error } = require('./middlewares/error');
+const { ThrowError } = require('./middlewares/throwError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -28,9 +29,16 @@ app.use(requestLogger);
 
 app.get('/crash-test', () => {
   setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
+    throw new ThrowError('Сервер сейчас упадёт');
   }, 0);
 });
+
+const validUrl = (link) => {
+  if (!validator.isURL(link)) {
+    throw new Error('Неправильный формат ссылки');
+  }
+  return link;
+};
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -43,7 +51,7 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     about: Joi.string().required().min(2).max(30),
-    avatar: Joi.string().required().url(),
+    avatar: Joi.string().required().custom(validUrl),
     password: Joi.string().required().min(8),
     email: Joi.string().required().email(),
   }),
@@ -61,7 +69,7 @@ app.use('/', cardRoutes);
 app.use(errorLogger);
 
 app.use(errors());
-app.use(Error);
+app.use(ThrowError);
 
 // app.use((err, req, res, next) => {
 //     // ...
