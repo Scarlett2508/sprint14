@@ -4,11 +4,14 @@ const User = require('../models/users');
 const BadRequestError = require('../errors/bad-request-err');
 const ConflictError = require('../errors/conflict-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
+const NotFoundError = require('../errors/not-found-err');
 const ThrowError = require('../middlewares/throwError');
+const { PrivateKey } = require('../config');
 
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
+    .orFail(new NotFoundError('Список пользователей пуст'))
     .then((users) => res.send({ data: users }))
     .catch(next);
 };
@@ -42,23 +45,16 @@ module.exports.createUser = (req, res) => {
     });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
+    .orFail(new BadRequestError('This user doesn not exist!'))
     .then((user) => {
       if (!user) {
         throw new BadRequestError('This user doesn not exist!');
       }
       res.send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Validation error');
-      }
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Bad request');
-      }
-      throw new ThrowError('Something happened');
-    });
+    .catch(next);
 };
 
 module.exports.login = (req, res, next) => {
@@ -68,7 +64,7 @@ module.exports.login = (req, res, next) => {
     .orFail(new UnauthorizedError('Неправильный email или пароль'))
     .then((user) => {
       res.send({
-        token: jwt.sign({ _id: user._id }, 'secret', { expiresIn: '7d' }),
+        token: jwt.sign({ _id: user._id }, PrivateKey, { expiresIn: '7d' }),
       });
     })
     .catch(next);
