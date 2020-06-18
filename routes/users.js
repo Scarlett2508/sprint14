@@ -9,6 +9,6 @@ routes.get('/:id', celebrate({
   }),
 }), getUser);
 
-routes.get('/users', getUsers);
+routes.get('/', getUsers);
 
 module.exports = routes;
