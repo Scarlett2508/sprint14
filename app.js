@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi } = require('celebrate');
@@ -68,9 +69,6 @@ app.use(errorLogger);
 app.use(errors());
 app.use(ThrowError);
 
-// app.use((err, req, res, next) => {
-//     // ...
-// });
 
 app.all('*', (req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
