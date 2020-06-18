@@ -19,10 +19,10 @@ module.exports.getCards = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId).populate('owner')
+    .orFail(() => {
+      throw new NotFoundError('There is no such card!');
+    })
     .then((card) => {
-      if (!card) {
-        throw new NotFoundError('There is no such card!');
-      }
       if (toString(card.owner) !== toString(req.user._id)) {
         throw new ForbiddenError('Forbidden!');
       }
