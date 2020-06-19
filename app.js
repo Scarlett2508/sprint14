@@ -76,3 +76,8 @@ app.use(ThrowError);
 
 
 app.listen(PORT);
+
+// eslint-disable-next-line no-unused-vars
+process.on('uncaughtException', (e) => {
+  process.exit(1);
+});
