@@ -1,5 +1,6 @@
-const express = require('express');
 require('dotenv').config();
+const express = require('express');
+
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi } = require('celebrate');
@@ -64,15 +65,14 @@ app.use(auth);
 app.use('/users', userRoutes);
 app.use('/cards', cardRoutes);
 
+app.all('*', (req, res) => {
+  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+});
+
 app.use(errorLogger);
 
 app.use(errors());
 app.use(ThrowError);
-
-
-app.all('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
-});
 
 
 app.listen(PORT);

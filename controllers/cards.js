@@ -23,7 +23,7 @@ module.exports.deleteCard = (req, res, next) => {
       throw new NotFoundError('There is no such card!');
     })
     .then((card) => {
-      if (toString(card.owner) !== toString(req.user._id)) {
+      if (toString(card.owner._id) !== toString(req.user._id)) {
         throw new ForbiddenError('Forbidden!');
       }
       return Card.findByIdAndRemove(cardId)
