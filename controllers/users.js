@@ -33,7 +33,7 @@ module.exports.createUser = (req, res, next) => {
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
-    .orFail(new BadRequestError('This user doesn not exist!'))
+    .orFail(new NotFoundError('This user doesn not exist!'))
     .then((user) => {
       if (!user) {
         throw new BadRequestError('This user doesn not exist!');
