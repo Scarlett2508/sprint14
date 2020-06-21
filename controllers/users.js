@@ -1,14 +1,20 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
+const BadRequestError = require('../errors/bad-request-err');
+const NotFoundError = require('../errors/not-found-err');
+const UnauthorizedError = require('../errors/unauthorized-err');
+const { PrivateKey } = require('../config');
 
-module.exports.getUsers = (req, res) => {
+
+module.exports.getUsers = (req, res, next) => {
   User.find({})
+    .orFail(new NotFoundError('Список пользователей пуст'))
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -22,50 +28,29 @@ module.exports.createUser = (req, res) => {
         email: user.email,
       });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Ошибка валидации' });
-      }
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: err.message });
-      }
-      // eslint-disable-next-line eqeqeq
-      if (err.code == '11000') {
-        return res.status(409).send({ message: 'Conflict' });
-      }
-      return res.status(500).send({ message: 'Внутренняя ошибка сервера' });
-    });
+    .catch(next);
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
+    .orFail(new NotFoundError('This user doesn not exist!'))
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'Пользователь не найден' });
+        throw new BadRequestError('This user doesn not exist!');
       }
       res.send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: err.message });
-      }
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: err.message });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
       res.send({
-        token: jwt.sign({ _id: user._id }, 'secret', { expiresIn: '7d' }),
+        token: jwt.sign({ _id: user._id }, PrivateKey, { expiresIn: '7d' }),
       });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch((error) => next(new UnauthorizedError(error.message)));
 };
